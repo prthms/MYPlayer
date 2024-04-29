@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+{% block title %}History | MY Player{% endblock %}
+{% block css %}
+.content{
+background-color: #f8f9fa !important;
+width: 79%;
+margin: 10vh 0 5px 21%;
+}
+.full-card{
+margin: 0.35rem auto;
+padding: 3px;
+}
+{% endblock %}
+{% block body %}
+{% load humanize %}
+<div class="container-fluid bg-light p-3 content">
+    <h4>Your History</h4> 
+    <div class="row">
+    {% for vid in video %}
+        <div class="col-md-12">
+            <div class="row rounded overflow-hidden mb-4 shadow-sm h-md-250 position-relative">
+                    <img class="col-md-3" src="/media/{{vid.thumbnail}}" width="200" height="180">
+                    <div class="col-md-8">
+                    <h3 class="mb-0">{{vid.videoTitle}}</h3>
+                    <div class="mb-1 text-muted">{{vid.channel}} . {{vid.views}} Views . {{vid.datetime|naturaltime}}</div>
+                    <a href="/watch/{{vid.id}}" class="stretched-link text-dark text-decoration-none">
+                    <p class="card-text mb-auto">{{vid.desc|slice:30}}</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}

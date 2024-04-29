@@ -1,0 +1,102 @@
+{% extends 'layout.html' %}
+{% block title %}Your Videos | MY Player{% endblock %}
+{% block css %}
+.content{
+background-color: #f8f9fa !important;
+width: 79%;
+margin: 10vh 0 5px 21%;
+}
+textarea[name='desc']{
+height:auto;
+}
+.thumbnail{
+margin:10px auto;
+width:450px;
+height:270px;
+}
+.camera-img{
+	margin:25% 44%;
+}
+{% endblock %}
+{% block body %}
+<div class="container bg-light p-3 content">
+    <h4 class="text-center text-muted">Edit Video</h4>
+    <form class="row g-3" onsubmit="uploadEdit(event)">
+        <div class="col-md-12 d-flex thumbnail-box">
+            <div class="thumbnail" id="thumbnailBox" style="background-image: linear-gradient(rgb(0 0 0 / 50%),rgb(0 0 0 / 50%)), url(/media/{{video.thumbnail}}); background-size: cover;">
+            	<img src="/static/icons/camera.png" class="camera-img">
+            </div>
+            <input type="file" id="thumbnailimg" style="opacity: 0.0; position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 86%; height:50%;" />
+        </div>
+        <div class="col-md-12">
+            <label for="inputEmail4" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" value="{{video.videoTitle}}">
+        </div>
+        <div class="col-md-4">
+            <label for="inputState" class="form-label">Category</label>
+            <select id="inputState" class="form-select">
+                <option selected>Choose...</option>
+                <option>Entertainment</option>
+                <option>Education</option>
+                <option>Comedy</option>
+                <option>Food</option>
+                <option>Cooking</option>
+                <option>Travelling</option>
+            </select>
+        </div>
+        <input type="hidden" value="{{video.id}}" id="videoId">
+        <input type="hidden" value="{{video.thumbnail}}" id="videoimg">
+        <div class="col-md-12">
+            <label for="inputPassword4" class="form-label">Description</label>
+            <textarea name="desc" class="form-control" id="desc">{{video.desc}}</textarea>
+        </div>
+        <div class="col-12">
+            <a href="/" class="btn btn-danger">Cancel</a>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+	function uploadEdit(event){
+		event.preventDefault();
+
+        let formData = new FormData();
+        formData.append("title", document.getElementById('title').value);
+        formData.append("desc", document.getElementById('desc').value);
+
+        let thumbnail = document.getElementById('thumbnailimg');
+        if(thumbnail.value.length != 0){
+        formData.append("thumbnail", document.getElementById('thumbnailimg').files[0]);
+    	}
+    	else{
+        	formData.append("thumbnail", document.getElementById('videoimg').value);
+    	}
+
+        let xhr = new XMLHttpRequest();
+        let url = 'http://127.0.0.1:8000/edit-video/'+ parseInt(document.getElementById('videoId').value);
+        xhr.open("POST", url, true);
+
+        // xhr.upload.addEventListener('progress', function(event) {
+        //     if (event.lengthComputable) {
+        //         console.log("Uploaded: " + event.loaded)
+        //         precent = (event.loaded / event.total) * 100;
+        //         progress.style.width = parseInt(precent) + "%";
+        //         progress.textContent = parseInt(precent) + "%";
+        //     }
+        // })
+
+        xhr.onload = function() {
+            if (this.status == 200) {
+                window.location = '/your-videos';
+
+            } else {
+                alert(this.responseText);
+            }
+        }
+
+        xhr.send(formData);
+	}
+</script>
+{% endblock %}
+

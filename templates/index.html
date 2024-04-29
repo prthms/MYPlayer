@@ -1,0 +1,123 @@
+{% extends 'layout.html' %}
+{% block title %}MY Player{% endblock %}
+{% block css %}
+.content{
+background-color: #f8f9fa !important;
+width: 79%;
+margin: 10vh 0 5px 21%;
+}
+.full-card{
+margin: 0.35rem auto;
+padding: 3px;
+}
+.dp{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background-size:cover;
+}
+.title{
+    color:black;
+    text-decoration:none;
+}
+.view{
+    font-size: 0.75rem;
+    color: rgba(0,0,0,0.5);
+    margin-bottom: 0px;
+    font-weight: 500;
+}
+
+{% endblock %}
+{% block body %}
+<div class="container-fluid bg-light p-3 content">
+    {% for message in messages %}
+    <div class='alert alert-{{message.tags}} alert-dismissible fade show' role='alert'>
+        {{message|safe}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+        <div class="row" id="content">
+            
+        </div>
+    </div>
+<script>
+function buildVidlabel(data,vid) {
+    let divcard = document.createElement('div');
+    let divmain = document.createElement('div');
+    let vlink = document.createElement('a');
+    let thumbnail = document.createElement('img');
+    let divrow = document.createElement('div');
+    let cdpl = document.createElement('a');
+    let cdp = document.createElement('img');
+    let col = document.createElement('div');
+    let title = document.createElement('a');
+    let vwdate = document.createElement('p');
+
+
+    // add attributes
+    divcard.setAttribute('class', 'col-md-3 full-card');
+    divmain.setAttribute('class', 'card shadow-sm');
+    thumbnail.setAttribute('class', 'bd-placeholder-img card-img-top');
+    thumbnail.setAttribute('width', '100%');
+    thumbnail.setAttribute('height', '180');
+    thumbnail.setAttribute('src', '/media/'+data['thumbnail']); // thubnail link
+    divrow.setAttribute('class', 'row');
+    cdpl.setAttribute('href', '/channel/'+data['channel']); // channel link
+    vlink.setAttribute('href', '/watch/'+vid); // video link
+    cdpl.setAttribute('class', 'col-md-3 mx-1');
+    cdp.setAttribute('src', '/media/'+data['thumbnail']); // chanel img
+    cdp.setAttribute('class', 'dp my-2'); 
+    col.setAttribute('class', 'col-md-8 my-1'); 
+    title.setAttribute('class', 'title');
+    title.setAttribute('href', '#');
+    vwdate.setAttribute('class', 'view');
+
+
+    // putting values
+    title.textContent = data['videoTitle'].slice(0,16)+'...';
+    var dateObject = new Date(data['datetime']);
+    vwdate.textContent = data['views']+" Views ."+" "+dateObject.toString().slice(0,15);
+ 
+   // append elements
+    divcard.appendChild(divmain);
+    divmain.appendChild(vlink);
+    vlink.appendChild(thumbnail);
+    divmain.appendChild(divrow);
+    divrow.appendChild(cdpl);
+    divrow.appendChild(col);
+    cdpl.appendChild(cdp);
+    col.appendChild(title);
+    col.appendChild(vwdate);
+
+    let content = document.getElementById('content');
+    content.append(divcard)
+}
+
+function getVideos() {
+    let xhr = new XMLHttpRequest();
+
+    let url = "http://127.0.0.1:8000/getvideos";
+
+    xhr.open('GET', url, true);
+    xhr.getResponseHeader('Content-type', 'application/json');
+
+
+    xhr.onload = function() {
+        if (this.status == 200) {
+            let res = JSON.parse(this.response);
+            for(let video of res){
+                data = video['fields'];
+                buildVidlabel(data,video['pk'])
+                // console.log(res)
+            }
+        } else {
+            console.log("Unable to fetch Data")
+        }
+    }
+
+    xhr.send()
+}
+
+getVideos()
+</script>
+{% endblock %}

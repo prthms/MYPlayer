@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block title %}Your Videos | MY Player{% endblock %}
+{% block css %}
+.content{
+background-color: #f8f9fa !important;
+width: 79%;
+margin: 10vh 0 5px 21%;
+}
+.full-card{
+margin: 0.35rem auto;
+padding: 3px;
+}
+{% endblock %}
+{% block body %}
+{% load humanize %}
+<div class="container-fluid bg-light p-3 content">
+    <h4>Your Videos</h4>
+    <div class="row">
+        {% for vid in videos %}
+        <div class="col-md-12">
+            <div class="row rounded overflow-hidden mb-4 shadow-sm h-md-250 position-relative">
+                <a href="/watch/{{vid.id}}" class="col-md-3">
+                    <img src="/media/{{vid.thumbnail}}" width="250" height="180">
+                </a>
+                <div class="col-md-8">
+                    <h3 class="mb-0">{{vid.videoTitle}}</h3>
+                    <div class="mb-1 text-muted">{{vid.channel}} . {{vid.views}} Views . {{vid.datetime|naturaltime}}</div>
+                    <!-- <a href="#" class="stretched-link text-dark text-decoration-none"></a> -->
+                    <p class="card-text mb-auto">{{vid.desc|slice:30}}</p>
+                    <a href="/edit-video/{{vid.id}}" class="btn btn-primary">Edit</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

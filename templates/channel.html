@@ -1,0 +1,150 @@
+{% extends 'layout.html' %}
+{% block title %}MY Player{% endblock %}
+{% block css %}
+.content{
+background-color: #f8f9fa !important;
+width: 79%;
+margin: 10vh 0 5px 21%;
+}
+.full-card{
+margin: 0.35rem auto;
+padding: 3px;
+}
+.profile-img{
+width:75px;
+height:75px;
+}
+.control-btn{
+font-size:14px;
+}
+{% endblock %}
+{% block body %}
+<div class="container-fluid bg-light p-3 content">
+    <div class="row">
+        <div class="col-md-1 mx-1">
+            <div class="profile-img rounded-circle bg-secondary"></div>
+        </div>
+        <div class="col-md-5 m-1">
+            <h4>{{basic.title}}</h4>
+            <p>2 subscriber</p>
+        </div>
+        {% if auth %}
+        <div class="col-md-5 my-3">
+            <div class="row">
+                <form class="col-auto">
+                    <button class="btn btn-primary control-btn" type="submit">CUSTOMIZE CHANNEL</button>
+                </form>
+                <form class="col-auto">
+                    <button class="btn btn-primary control-btn" type="submit">MANAGE VIDEOS</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-md-5 my-3">
+            <div class="row">
+                <form class="col-auto">
+                    <button class="btn btn-danger control-btn" type="submit">SUBSCRIBE</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        <hr>
+    </div>
+    <nav class="nav d-flex justify-content-between">
+        <a class="p-2 link-secondary" href="/channel/{{basic.channelId}}">Home</a>
+        <a class="p-2 link-secondary" href="/channel/{{basic.channelId}}">Videos</a>
+        <a class="p-2 link-secondary" href="#">Playlist</a>
+        <a class="p-2 link-secondary" href="#" id="about">About</a>
+    </nav>
+    <hr>
+    <input type="hidden" id="channelId" value="{{basic.channelId}}">
+    <div class="container" id="content">
+        {% for video in videos|slice:4 %}
+        <div class="row rounded overflow-hidden mb-4 shadow-sm h-md-250 position-relative">
+            <img class="col-md-3" src="/media/{{video.thumbnail}}" width="200" height="180">
+            <div class="col-md-8">
+                <h3 class="mb-0">{{video.videoTitle}}</h3>
+                <div class="mb-1 text-muted">channel name, views, date time</div>
+                <a href="/watch/{{video.id}}" class="stretched-link">
+                    <p class="card-text mb-auto">{{video.desc}}</p>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<script>
+// function buildVidlabel(params) {
+//     let divmain = document.createElement('div');
+//     let thumbnail = document.createElement('img');
+//     let divdetail = document.createElement('div');
+//     let title = document.createElement('h3');
+//     let divrelate = document.createElement('div');
+//     let adesc = document.createElement('a');
+//     let desc = document.createElement('p');
+
+//     // add attributes
+//     divmain.setAttribute('class','row rounded overflow-hidden mb-4 shadow-sm h-md-250 position-relative');
+//     thumbnail.setAttribute('class','col-md-3');
+//     thumbnail.setAttribute('src',params['link']);
+//     thumbnail.setAttribute('width','200');
+//     thumbnail.setAttribute('height','180');
+//     divdetail.setAttribute('class','col-md-8');
+//     title.setAttribute('class','mb-0');
+//     divrelate.setAttribute('class','mb-1 text-muted');
+//     adesc.setAttribute('class','stretched-link');
+//     desc.setAttribute('class','card-text mb-auto');
+
+//     // putting values
+//     console.log(params['title'])
+//     title.textContent = params['title'];
+//     adesc.setAttribute('href',params['vlink']);
+//     desc.textContent = params['desc'];
+//     divrelate.textContent = "views, publish date humanize"
+//     // append elements
+//     divmain.appendChild(thumbnail);
+//     divmain.appendChild(divdetail);
+//     divdetail.appendChild(title);
+//     divdetail.appendChild(divrelate);
+//     divrelate.appendChild(adesc);
+//     adesc.appendChild(desc);
+
+//     let mainbox = document.getElementById('content');
+//     mainbox.append(divmain)
+
+// }
+
+// let params = {title:"Video Title",vlink:'/watch/21',desc:"This is a description",link:"/static/img/demo.jpg"}
+// buildVidlabel(params)
+
+about.addEventListener('click',callAbout);
+
+function callAbout(){
+let xhr = new XMLHttpRequest();
+
+console.log(channelId.value)
+
+let url = "http://127.0.0.1:8000/channel-about/"+channelId.value;
+
+xhr.open('GET', url,true);
+xhr.getResponseHeader('Content-type','application/json');
+
+
+xhr.onload = function(){
+    if(this.status == 200){
+        // let response = JSON.parse(this.responseText);
+        let res = JSON.parse(this.response);
+        aboutPage = '<p>'+res['basic']['about'];+"</p>";
+        let content = document.getElementById('content');
+        content.innerHTML = aboutPage;
+    }
+    else{
+        console.log("Unable to fetch Data")
+    }
+}
+
+xhr.send()
+}
+
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Upload Video | MY Player</title>
+</head>
+
+<body>
+    <div class="container-fluid p-0">
+        <!-- Upper bar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light up-nav">
+            <div class="container-fluid">
+                <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+                    <svg class="bi me-2" width="40" height="32">
+                        <use xlink:href="#bootstrap"></use>
+                    </svg>
+                    <span class="fs-4">MY Player</span>
+                </a>
+                <hr>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <form class="d-flex mx-auto">
+                        <input class="form-control me-2 col-md-5" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
+                </div>
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                    <p class="dropdown-toggle text-dark my-1 text-capitalize" id="dropdownLogout" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                        Welcome, {{user}}
+                    </p>
+                    <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="dropdownLogout">
+                        <li><a class="dropdown-item" href="/channel/{{channel.id}}" id="viewchannelbtn">View Channel</a></li>
+                        <li><a class="dropdown-item" href="#">Manage Videos</a></li>
+                        <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </nav>
+    </div>
+    <div class="container">
+        <!-- 1.  form fill up after uploading video -->
+        <div class="container">
+            <h3 class="text-center my-2 text-muted">Dashboard</h3>
+            <form action="/upload-video-save" method="post" onsubmit="uploadVideo(event)">{% csrf_token %}
+                <div class="row g-3" id="addDetails">
+                    <div class="col-md-12">
+                        <label for="Title" class="form-label">Video Title</label>
+                        <input type="text" class="form-control" id="Title" placeholder="Enter Video Title" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="inputCat" class="form-label">Category</label>
+                        <select id="Category" class="form-select">
+                            <option selected>Choose</option>
+                            <option value="1">Comedy</option>
+                            <option value="2">Facts</option>
+                            <option value="3">Gaming</option>
+                            <option value="4">Nature</option>
+                            <option value="5">Education</option>
+                            <option value="6">Entertainment</option>
+                            <option value="7">Sports</option>
+                            <option value="8">Technology</option>
+                            <option value="9">Other...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="inputTitle" class="form-label">Description</label>
+                        <textarea class="form-control" id="Desc"></textarea>
+                        <p class="btn btn-primary my-2" id="nextbtn">Next</p>
+                    </div>
+                </div>
+        </div>
+        <div class="container" id="uploadFile" style="display: none;">
+            <div class="col-md-12">
+                <label for="inputTitle" class="form-label">Thumbnail</label>
+                <input type="file" class="form-control" id="thumbnail" placeholder="Choose Video" required>
+                <label for="inputTitle" class="form-label">Select Video to Upload</label>
+                <input type="file" class="form-control" id="inputVideo" placeholder="Choose Video" required>
+                <button class="btn btn-danger my-2">Back</button>
+                <button class="btn btn-primary my-2" type="submit" id="uploadbtn">Upload</button>
+            </div>
+        </div>
+        </form>
+        <div id="progressBox" style="display: none;">
+            <h5 class="text-center my-2 text-muted">Uploading...</h5>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+            </div>
+            <h6 style="font-size: 12px !important;" class="text-danger text-center my-1">Please Don't Refresh the page, Until the uplaoding is not Completed...</h6>
+        </div>
+    </div>
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script>
+    let nextbtn = document.getElementById('nextbtn');
+    nextbtn.addEventListener('click', function(event) {
+        addDetails.style.display = "none";
+        uploadFile.style.display = "block";
+    });
+
+    function uploadVideo(event) {
+        event.preventDefault();
+
+        let formData = new FormData();
+        formData.append("title", document.getElementById('Title').value);
+        formData.append("desc", document.getElementById('Desc').value);
+        formData.append("thumbnail", document.getElementById('thumbnail').files[0]);
+        formData.append("video", document.getElementById('inputVideo').files[0]);
+
+        uploadFile.style.display = "none";
+        progressBox.style.display = "block";
+
+        let xhr = new XMLHttpRequest();
+
+        xhr.open("POST", 'http://127.0.0.1:8000/upload-video-save', true);
+
+        xhr.upload.addEventListener('progress', function(event) {
+            if (event.lengthComputable) {
+                console.log("Uploaded: " + event.loaded)
+                precent = (event.loaded / event.total) * 100;
+                progress.style.width = parseInt(precent) + "%";
+                progress.textContent = parseInt(precent) + "%";
+            }
+        })
+
+        xhr.onload = function() {
+            if (this.status == 200) {
+                window.location = viewchannelbtn.getAttribute('href');
+
+            } else {
+                alert(this.responseText);
+            }
+        }
+
+        xhr.send(formData);
+    }
+
+
+    </script>
+</body>
+
+</html>
